@@ -111,7 +111,7 @@
         "roleAssignmentId": "[guid(resourceGroup().name)]",
         "containerGroupName": "[resourceGroup().name]",
         "StorageAccountName": "[take(parameters('configurationStorageAccount'),23)]",
-        "SyncStorageShare": "[parameters('configurationStorageShareName')]"
+        "configStorageShare": "[parameters('configurationStorageShareName')]"
     },
     "resources": [
         {
@@ -175,7 +175,7 @@
                                 },
                                 {
                                     "name": "AZURE_STORAGE_SHARE",
-                                    "value": "[variables('SyncStorageShare')]"
+                                    "value": "[variables('configStorageShare')]"
                                 },
                                 {
                                     "name": "PUBLIC_DOMAIN",
