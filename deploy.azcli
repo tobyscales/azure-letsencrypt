@@ -1,0 +1,24 @@
+## Standard Variables for Azure Boostrapper (more here-- https://github.com/tescales/azure-bootstrapper-arm)
+$resourceGroup = "nginxle"
+$location = "westus2"
+$gitHubUser = "tescales"
+$gitHubRepo = "azure-letsencrypt"
+$roleName = "Owner"
+$kvName = "none"
+
+## Project Variables
+$configurationStorageAccount = "$($resourceGroup)stor"
+$configurationStorageShareName = "nginx-configs"
+$publicDomain = "www.test.com"
+$publicPort = "443"
+
+## Full Standard Deployment
+az group create -n $resourceGroup -l $location 
+az group deployment create --template-file azuredeploy.json --resource-group $resourceGroup --parameters gitHubUser=$githubUser gitHubRepo=$gitHubRepo roleName=Owner newVaultName=none 
+az group deployment create --template-file azuredeploy.json --resource-group $resourceGroup --parameters gitHubUser=$githubUser gitHubRepo=$gitHubRepo roleName=Owner newVaultName=none ssl-env=staging configurationStorageAccount=$configurationStorageAcct configurationStorageShareName=$configurationStorageShareName publicDomain=$publicDomain publicPort=$publicPort
+
+## Customized Deployment
+az group deployment create --template-file azuredeploy.json --resource-group $resourceGroup --parameters \ 
+    gitHubUser=$githubUser gitHubRepo=$gitHubRepo roleName=Owner newVaultName=none \ 
+    configurationStorageAccount=$configurationStorageAcct configurationStorageShareName=$configurationStorageShareName \
+    publicDomain=$publicDomain publicPort=$publicPort
