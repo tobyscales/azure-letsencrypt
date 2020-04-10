@@ -52,6 +52,12 @@
             "type": "string",
             "defaultValue": "ffsync-data"
         },
+        "privateAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter the internal domain to direct traffic to, in the format http://domain-or-ip:8080."
+            }
+        },
         "publicDomain": {
             "type": "string",
             "metadata": {
@@ -176,6 +182,10 @@
                                 {
                                     "name": "AZURE_STORAGE_SHARE",
                                     "value": "[variables('configStorageShare')]"
+                                },
+                                {
+                                    "name": "PRIVATE_ADDRESS",
+                                    "value": "[parameters('privateAddress')]"
                                 },
                                 {
                                     "name": "PUBLIC_DOMAIN",
