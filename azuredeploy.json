@@ -102,9 +102,6 @@
             "StorageBlobDataReader": {
                 "value": "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"
             },
-            "None": {
-                "id": "none"
-            },
             "none": {
                 "id": "none"
             }
@@ -113,8 +110,8 @@
         "roleDefinitionId": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', variables('chosenRole'))]",
         "roleAssignmentId": "[guid(resourceGroup().name)]",
         "containerGroupName": "[resourceGroup().name]",
-        "StorageAccountName": "[take(parameters('SyncStorageAccount'),23)]",
-        "SyncStorageShare": "[parameters('SyncStorageShareName')]"
+        "StorageAccountName": "[take(parameters('configurationStorageAccount'),23)]",
+        "SyncStorageShare": "[parameters('configurationStorageShareName')]"
     },
     "resources": [
         {
@@ -181,12 +178,12 @@
                                     "value": "[variables('SyncStorageShare')]"
                                 },
                                 {
-                                    "name": "SYNC_DOMAIN",
-                                    "value": "[parameters('SyncDomainName')]"
+                                    "name": "PUBLIC_DOMAIN",
+                                    "value": "[parameters('publicDomain')]"
                                 },
                                 {
-                                    "name": "SYNC_PORT",
-                                    "value": "[parameters('SyncPort')]"
+                                    "name": "PUBLIC_PORT",
+                                    "value": "[parameters('publicPort')]"
                                 }
                             ],
                             "resources": {
@@ -299,7 +296,7 @@
                             "environmentVariables": [
                                 {
                                     "name": "DOMAIN",
-                                    "value": "[parameters('SyncDomainName')]"
+                                    "value": "[parameters('publicDomain')]"
                                 },
                                 {
                                     "name": "EMAIL",
@@ -316,7 +313,7 @@
                                     "protocol": "TCP"
                                 },
                                 {
-                                    "port": "[parameters('SyncPort')]",
+                                    "port": "[parameters('publicPort')]",
                                     "protocol": "TCP"
                                 }
                             ]
@@ -351,15 +348,6 @@
                             "storageAccountName": "[variables('StorageAccountName')]",
                             "storageAccountKey": "[listKeys(variables('storageAccountName'),'2017-10-01').keys[0].value]"
                         }
-                    },
-                    {
-                        "name": "sync-storage",
-                        "azureFile": {
-                            "shareName": "[variables('SyncStorageShare')]",
-                            "readOnly": false,
-                            "storageAccountName": "[variables('StorageAccountName')]",
-                            "storageAccountKey": "[listKeys(variables('storageAccountName'),'2017-10-01').keys[0].value]"
-                        }
                     }
                 ],
                 "ipAddress": {
@@ -367,7 +355,7 @@
                     "ports": [
                         {
                             "protocol": "tcp",
-                            "port": "[parameters('SyncPort')]"
+                            "port": "[parameters('publicPort')]"
                         },
                         {
                             "protocol": "tcp",
