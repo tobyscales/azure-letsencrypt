@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "gitHubUser": {
@@ -50,18 +50,12 @@
         },
         "configurationStorageShareName": {
             "type": "string",
-            "defaultValue": "ffsync-data"
+            "defaultValue": "nginx"
         },
         "privateAddress": {
             "type": "string",
             "metadata": {
-                "description": "Enter the internal domain to direct traffic to, in the format http://domain-or-ip."
-            }
-        },
-        "privatePort": {
-            "type": "string",
-            "metadata": {
-                "description": "Enter the internal port to direct traffic to."
+                "description": "Enter the internal domain to direct traffic to, in the format http://domain-or-ip:port."
             }
         },
         "publicDomain": {
@@ -122,7 +116,7 @@
         "roleDefinitionId": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', variables('chosenRole'))]",
         "roleAssignmentId": "[guid(resourceGroup().name)]",
         "containerGroupName": "[resourceGroup().name]",
-        "StorageAccountName": "[take(parameters('configurationStorageAccount'),23)]",
+        "storageAccountName": "[take(replace(parameters('configurationStorageAccount'),'-',''),15)]",
         "configStorageShare": "[parameters('configurationStorageShareName')]"
     },
     "resources": [
@@ -192,11 +186,7 @@
                                 {
                                     "name": "PRIVATE_ADDRESS",
                                     "value": "[parameters('privateAddress')]"
-                                },
-                                                                {
-                                    "name": "PRIVATE_PORT",
-                                    "value": "[parameters('privatePort')]"
-                                },
+                                },                                                               
                                 {
                                     "name": "PUBLIC_DOMAIN",
                                     "value": "[parameters('publicDomain')]"
@@ -208,8 +198,8 @@
                             ],
                             "resources": {
                                 "requests": {
-                                    "cpu": "1",
-                                    "memoryInGb": "1"
+                                    "cpu": 1,
+                                    "memoryInGb": 1
                                 }
                             }
                         }
@@ -266,7 +256,7 @@
                             "keys": [
                             ],
                             "secrets": [
-                                "all"
+                                "get","set","list","delete"
                             ],
                             "certificates": [
                             ],
@@ -309,8 +299,8 @@
                             ],
                             "resources": {
                                 "requests": {
-                                    "cpu": ".5",
-                                    "memoryInGb": ".5"
+                                    "cpu": 1,
+                                    "memoryInGb": 1
                                 }
                             },
                             "environmentVariables": [
@@ -329,7 +319,7 @@
                             ],
                             "ports": [
                                 {
-                                    "port": "80",
+                                    "port": 80,
                                     "protocol": "TCP"
                                 },
                                 {
@@ -379,7 +369,7 @@
                         },
                         {
                             "protocol": "tcp",
-                            "port": "80"
+                            "port": 80
                         }
                     ],
                     "dnsNameLabel": "[variables('containerGroupName')]"
@@ -387,7 +377,7 @@
             }
         },
         {
-            "name": "[variables('StorageAccountName')]",
+            "name": "[variables('storageAccountName')]",
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2018-02-01",
             "location": "[resourceGroup().location]",
@@ -403,7 +393,7 @@
         },
         {
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-            "apiVersion": "2019-04-01",
+            "apiVersion": "2019-06-01",
             "name": "[concat(variables('storageAccountName'), '/default/', variables('NginxCertShare'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
@@ -411,7 +401,7 @@
         },
         {
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-            "apiVersion": "2019-04-01",
+            "apiVersion": "2019-06-01",
             "name": "[concat(variables('storageAccountName'), '/default/', variables('NginxConfigShare'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
@@ -419,7 +409,7 @@
         },
         {
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-            "apiVersion": "2019-04-01",
+            "apiVersion": "2019-06-01",
             "name": "[concat(variables('storageAccountName'), '/default/', variables('NginxHtmlShare'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"

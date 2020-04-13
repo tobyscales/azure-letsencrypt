@@ -1,5 +1,5 @@
 ## Standard Variables for Azure Boostrapper (more here-- https://github.com/tescales/azure-bootstrapper-arm)
-$resourceGroup = "nginxle"
+$resourceGroup = "nginx-letsencrypt"
 $location = "westus2"
 $gitHubUser = "tescales"
 $gitHubRepo = "azure-letsencrypt"
@@ -7,18 +7,14 @@ $roleName = "Owner"
 $kvName = "none"
 
 ## Project Variables
-$configurationStorageAccount = "$($resourceGroup)stor"
-$configurationStorageShareName = "nginx-configs"
-$privateAddress = "http://10.0.0.100"
+$privateAddress = "http://10.0.0.100:8080"
 $privatePort = "8080"
 $publicDomain = "www.test.com"
 $publicPort = "443"
 
 ## Full Standard Deployment
 az group create -n $resourceGroup -l $location 
-az group deployment create  --template-file azuredeploy.json --resource-group $resourceGroup --parameters gitHubUser=$githubUser gitHubRepo=$gitHubRepo roleName=Owner newVaultName=none ssl-env=staging configurationStorageAccount=$configurationStorageAcct configurationStorageShareName=$configurationStorageShareName privateAddress=$privateAddress publicDomain=$publicDomain publicPort=$publicPort
-az deployment group create --template-file azuredeploy.json --resource-group $resourceGroup 
-#--parameters gitHubUser=$githubUser gitHubRepo=$gitHubRepo roleName=Owner newVaultName=none ssl-env=staging configurationStorageAccount=$configurationStorageAcct configurationStorageShareName=$configurationStorageShareName privateAddress=$privateAddress publicDomain=$publicDomain publicPort=$publicPort
+az deployment group create --name "from_deploy_cli" --template-file azuredeploy.json --resource-group $resourceGroup --parameters gitHubUser=$githubUser gitHubRepo=$gitHubRepo roleName=Owner newVaultName=none ssl-env=staging privateAddress=$privateAddress publicDomain=$publicDomain publicPort=$publicPort
 
 ## Customized Deployment
 az group deployment create --template-file azuredeploy.json --resource-group $resourceGroup --parameters \ 
@@ -27,5 +23,5 @@ az group deployment create --template-file azuredeploy.json --resource-group $re
     publicDomain=$publicDomain publicPort=$publicPort
 
 ## Troubleshoot Deployment
-az group deployment operation list --resource-group $resourceGroup --name *
+az deployment operation group list --resource-group $resourceGroup --name "from_deploy_cli"
 az deployment group operation list --name exampledeployment -g examplegroup --query [].properties.request
