@@ -34,6 +34,10 @@ az configure --defaults group=$AZURE_RESOURCE_GROUP
 cd /$BOOTSTRAP_REPO
 
 ### Custom Code goes here 
+function sedPath { 
+    local path=$((echo $1|sed -r 's/([\$\.\*\/\[\\^])/\\\1/g'|sed 's/[]]/\[]]/g')>&1) 
+    echo "$path"
+    }
 echo Shared State Storage: $AZURE_STORAGE_ACCOUNT
 echo Nginx Configured Domain: $PUBLIC_DOMAIN
 echo Nginx Configured Port: $PUBLIC_PORT
@@ -43,11 +47,16 @@ az storage share policy create -n $AZURE_STORAGE_ACCOUNT -s nginx-config --permi
 az storage share policy create -n $AZURE_STORAGE_ACCOUNT -s nginx-html --permissions dlrw
 az storage share policy create -n $AZURE_STORAGE_ACCOUNT -s nginx-certs --permissions dlrw
 
+#clean up env vars for sed
+PUBLIC_DOMAIN=$(sedPath $PUBLIC_DOMAIN)
+PUBLIC_PORT=$(sedPath $PUBLIC_PORT)
+PRIVATE_ADDRESS=$(sedPath $PRIVATE_ADDRESS)
+
 # pass env variables through to config scripts
 echo Updating config files...
 sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
-sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$BOOTSTRAP_REPO/conf/*.*
+sed -i 's/{PRIVATE_ADDRESS}/'http://$PRIVATE_ADDRESS'/g' /$BOOTSTRAP_REPO/conf/*.*
 #sed -i 's/{PRIVATE_PORT}/'$PRIVATE_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
 
 az storage file upload --source /$BOOTSTRAP_REPO/conf/default.conf --share-name nginx-config 
