@@ -51,7 +51,7 @@ az storage share policy create -n $AZURE_STORAGE_ACCOUNT -s nginx-certs --permis
 sed -i 's/{DOMAIN}/'$SYNC_DOMAIN'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PORT}/'$SYNC_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$BOOTSTRAP_REPO/conf/*.*
-sed -i 's/{PRIVATE_PORT}/'$PRIVATE_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
+#sed -i 's/{PRIVATE_PORT}/'$PRIVATE_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
 
 az storage file upload --source /$BOOTSTRAP_REPO/conf/default.conf --share-name nginx-config 
 az storage file upload --source /$BOOTSTRAP_REPO/html/index.html --share-name nginx-html 
