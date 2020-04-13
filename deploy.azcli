@@ -9,16 +9,23 @@ $kvName = "none"
 ## Project Variables
 $configurationStorageAccount = "$($resourceGroup)stor"
 $configurationStorageShareName = "nginx-configs"
-$privateAddress = "http://10.0.0.100:8080"
+$privateAddress = "http://10.0.0.100"
+$privatePort = "8080"
 $publicDomain = "www.test.com"
 $publicPort = "443"
 
 ## Full Standard Deployment
 az group create -n $resourceGroup -l $location 
-az deployment group create --template-file azuredeploy.json --resource-group $resourceGroup --parameters gitHubUser=$githubUser gitHubRepo=$gitHubRepo roleName=Owner newVaultName=none ssl-env=staging configurationStorageAccount=$configurationStorageAcct configurationStorageShareName=$configurationStorageShareName privateAddress=$privateAddress publicDomain=$publicDomain publicPort=$publicPort
+az group deployment create  --template-file azuredeploy.json --resource-group $resourceGroup --parameters gitHubUser=$githubUser gitHubRepo=$gitHubRepo roleName=Owner newVaultName=none ssl-env=staging configurationStorageAccount=$configurationStorageAcct configurationStorageShareName=$configurationStorageShareName privateAddress=$privateAddress publicDomain=$publicDomain publicPort=$publicPort
+az deployment group create --template-file azuredeploy.json --resource-group $resourceGroup 
+#--parameters gitHubUser=$githubUser gitHubRepo=$gitHubRepo roleName=Owner newVaultName=none ssl-env=staging configurationStorageAccount=$configurationStorageAcct configurationStorageShareName=$configurationStorageShareName privateAddress=$privateAddress publicDomain=$publicDomain publicPort=$publicPort
 
 ## Customized Deployment
 az group deployment create --template-file azuredeploy.json --resource-group $resourceGroup --parameters \ 
     gitHubUser=$githubUser gitHubRepo=$gitHubRepo roleName=Owner newVaultName=none \ 
     configurationStorageAccount=$configurationStorageAcct configurationStorageShareName=$configurationStorageShareName \
     publicDomain=$publicDomain publicPort=$publicPort
+
+## Troubleshoot Deployment
+az group deployment operation list --resource-group $resourceGroup --name *
+az deployment group operation list --name exampledeployment -g examplegroup --query [].properties.request

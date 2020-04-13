@@ -55,7 +55,13 @@
         "privateAddress": {
             "type": "string",
             "metadata": {
-                "description": "Enter the internal domain to direct traffic to, in the format http://domain-or-ip:8080."
+                "description": "Enter the internal domain to direct traffic to, in the format http://domain-or-ip."
+            }
+        },
+        "privatePort": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter the internal port to direct traffic to."
             }
         },
         "publicDomain": {
@@ -125,10 +131,10 @@
             "type": "Microsoft.ContainerInstance/containerGroups",
             "apiVersion": "2018-10-01",
             "location": "[resourcegroup().location]",
-            "comments": "",
             "identity": {
                 "type": "SystemAssigned"
             },
+
             "properties": {
                 "containers": [
                     {
@@ -186,6 +192,10 @@
                                 {
                                     "name": "PRIVATE_ADDRESS",
                                     "value": "[parameters('privateAddress')]"
+                                },
+                                                                {
+                                    "name": "PRIVATE_PORT",
+                                    "value": "[parameters('privatePort')]"
                                 },
                                 {
                                     "name": "PUBLIC_DOMAIN",
