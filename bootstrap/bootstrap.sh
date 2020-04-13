@@ -35,12 +35,8 @@ cd /$BOOTSTRAP_REPO
 
 ### Custom Code goes here 
 echo Shared State Storage: $AZURE_STORAGE_ACCOUNT
-echo Nginx Configuration Data: $AZURE_STORAGE_SHARE
 echo Nginx Configured Domain: $PUBLIC_DOMAIN
 echo Nginx Configured Port: $PUBLIC_PORT
-
-echo Setting up sync storage account...
-az storage share policy create -n $AZURE_STORAGE_ACCOUNT -s $AZURE_STORAGE_SHARE --permissions dlrw
 
 echo Setting up Nginx storage accounts...
 az storage share policy create -n $AZURE_STORAGE_ACCOUNT -s nginx-config --permissions dlrw
@@ -48,8 +44,9 @@ az storage share policy create -n $AZURE_STORAGE_ACCOUNT -s nginx-html --permiss
 az storage share policy create -n $AZURE_STORAGE_ACCOUNT -s nginx-certs --permissions dlrw
 
 # pass env variables through to config scripts
-sed -i 's/{DOMAIN}/'$SYNC_DOMAIN'/g' /$BOOTSTRAP_REPO/conf/*.*
-sed -i 's/{PORT}/'$SYNC_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
+echo Updating config files...
+sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$BOOTSTRAP_REPO/conf/*.*
+sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$BOOTSTRAP_REPO/conf/*.*
 #sed -i 's/{PRIVATE_PORT}/'$PRIVATE_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
 
