@@ -56,7 +56,7 @@ PRIVATE_ADDRESS=$(sedPath $PRIVATE_ADDRESS)
 echo Updating config files...
 sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
-sed -i 's/{PRIVATE_ADDRESS}/'http://$PRIVATE_ADDRESS'/g' /$BOOTSTRAP_REPO/conf/*.*
+sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$BOOTSTRAP_REPO/conf/*.*
 #sed -i 's/{PRIVATE_PORT}/'$PRIVATE_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
 
 az storage file upload --source /$BOOTSTRAP_REPO/conf/default.conf --share-name nginx-config 
