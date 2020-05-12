@@ -152,7 +152,7 @@
         "subnetName": "[concat('sn-', variables('baseName'))]",
         "virtualNetworkRef": "[resourceId('Microsoft.Network/virtualnetworks', variables('virtualNetworkName'))]",
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('virtualNetworkName'),variables('subnetName'))]",
-        "nginxMode": "[if(equals('none', parameters('privateAddress')),'proxy','noproxy')]"
+        "nginxMode": "[if(equals('none', parameters('privateAddress')),'noproxy','proxy')]"
     },
     "resources": [
         {

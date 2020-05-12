@@ -61,8 +61,11 @@ sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$BOOTSTRAP_REPO/conf/*.*
 
-az storage file upload --source /$BOOTSTRAP_REPO/conf/$NGINX_MODE.conf --share-name nginx-config 
-az storage file upload --source /$BOOTSTRAP_REPO/html/index.html --share-name nginx-html 
+if [[ az storage file exists --share-name nginx-config --path $NGINX_MODE.conf ]]; then
+echo $NGINX_MODE file exists
+fi 
+az storage file upload --source /$BOOTSTRAP_REPO/conf/$NGINX_MODE.conf --share-name nginx-config --no-progress
+az storage file upload --source /$BOOTSTRAP_REPO/html/index.html --share-name nginx-html --no-progress
 
 
 #"set" | az container exec --exec-command /bin/sh -n $AZURE_RESOURCE_GROUP -g $AZURE_RESOURCE_GROUP 
