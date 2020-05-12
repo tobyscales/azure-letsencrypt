@@ -61,9 +61,9 @@ sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$BOOTSTRAP_REPO/conf/*.*
 
-az storage file exists --share-name nginx-config --path $NGINX_MODE.conf
+az storage file exists --share-name nginx-config --path $NGINX_MODE.conf --query [].exists -o tsv
 
-if [[ -z $(az storage file exists --share-name nginx-config --path ${NGINX_MODE}.conf ) ]]; then
+if [[ -z $(az storage file exists --share-name nginx-config --path $NGINX_MODE.conf ) ]]; then
 echo $NGINX_MODE file exists
 fi 
 
@@ -75,4 +75,4 @@ echo Configuration complete!
 #"set" | az container exec --exec-command /bin/sh -n $AZURE_RESOURCE_GROUP -g $AZURE_RESOURCE_GROUP 
 
 ## uncomment the below statement to troubleshoot your startup script interactively in ACI (on the Connect tab)
-#tail -f /dev/null
+tail -f /dev/null
