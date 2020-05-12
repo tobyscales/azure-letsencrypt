@@ -45,6 +45,7 @@ echo Nginx Configured Domain: $PUBLIC_DOMAIN
 echo Nginx Configured Port: $PUBLIC_PORT
 echo Nginx Mode: $NGINX_MODE
 
+#set default storage account permissions
 echo Setting up Nginx storage accounts...
 az storage share policy create -n $AZURE_STORAGE_ACCOUNT -s nginx-config --permissions dlrw
 az storage share policy create -n $AZURE_STORAGE_ACCOUNT -s nginx-html --permissions dlrw
@@ -61,14 +62,24 @@ sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$BOOTSTRAP_REPO/conf/*.*
 
-az storage file exists --share-name nginx-config --path $NGINX_MODE.conf --query [].exists -o tsv
+#az storage file exists --share-name nginx-config --path $NGINX_MODE.conf --query exists
+echo Uploading config files...
+nginxconfig=$(az storage file exists --share-name nginx-config --path $NGINX_MODE.conf --query exists)
+indexhtml=$(az storage file exists --share-name nginx-html --path index.html --query exists)
 
-if [[ -z $(az storage file exists --share-name nginx-config --path $NGINX_MODE.conf ) ]]; then
-echo $NGINX_MODE file exists
+if [ ! $nginxconfig ]; then
+az storage file upload --source /$BOOTSTRAP_REPO/conf/$NGINX_MODE.conf --share-name nginx-config --no-progress
+else 
+echo $NGINX_MODE file exists, will not update.
 fi 
 
-az storage file upload --source /$BOOTSTRAP_REPO/conf/$NGINX_MODE.conf --share-name nginx-config --no-progress
+if [ ! $indexhtml ]; then
 az storage file upload --source /$BOOTSTRAP_REPO/html/index.html --share-name nginx-html --no-progress
+else 
+echo index.html file exists, will not update.
+fi 
+
+#az storage file upload --source /$BOOTSTRAP_REPO/html/index.html --share-name nginx-html --no-progress
 
 echo Configuration complete!
 
