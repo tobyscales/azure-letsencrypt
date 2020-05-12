@@ -61,7 +61,7 @@ sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$BOOTSTRAP_REPO/conf/*.*
 
-if [[ az storage file exists --share-name nginx-config --path $NGINX_MODE.conf ]]; then
+if [[ -z $(az storage file exists --share-name nginx-config --path ${NGINX_MODE}.conf ) ]]; then
 echo $NGINX_MODE file exists
 fi 
 az storage file upload --source /$BOOTSTRAP_REPO/conf/$NGINX_MODE.conf --share-name nginx-config --no-progress
