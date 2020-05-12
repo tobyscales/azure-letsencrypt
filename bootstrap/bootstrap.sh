@@ -57,12 +57,11 @@ PUBLIC_PORT=$(sedPath $PUBLIC_PORT)
 PRIVATE_ADDRESS=$(sedPath $PRIVATE_ADDRESS)
 
 # pass env variables through to config scripts
-echo Updating config files...
+echo Injecting config files...
 sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$BOOTSTRAP_REPO/conf/*.*
 
-#az storage file exists --share-name nginx-config --path $NGINX_MODE.conf --query exists
 echo Uploading config files...
 nginxconfig=$(az storage file exists --share-name nginx-config --path $NGINX_MODE.conf --query exists)
 indexhtml=$(az storage file exists --share-name nginx-html --path index.html --query exists)
@@ -70,20 +69,18 @@ indexhtml=$(az storage file exists --share-name nginx-html --path index.html --q
 if [ ! $nginxconfig ]; then
 az storage file upload --source /$BOOTSTRAP_REPO/conf/$NGINX_MODE.conf --share-name nginx-config --no-progress
 else 
-echo $NGINX_MODE file exists, will not update.
+echo "  ** $NGINX_MODE.conf file exists, will not update. ** "
 fi 
 
 if [ ! $indexhtml ]; then
 az storage file upload --source /$BOOTSTRAP_REPO/html/index.html --share-name nginx-html --no-progress
 else 
-echo index.html file exists, will not update.
+echo "  ** index.html file exists, will not update. ** "
 fi 
 
-#az storage file upload --source /$BOOTSTRAP_REPO/html/index.html --share-name nginx-html --no-progress
-
-echo Configuration complete!
+echo "### Configuration complete! ###"
 
 #"set" | az container exec --exec-command /bin/sh -n $AZURE_RESOURCE_GROUP -g $AZURE_RESOURCE_GROUP 
 
 ## uncomment the below statement to troubleshoot your startup script interactively in ACI (on the Connect tab)
-tail -f /dev/null
+#tail -f /dev/null
