@@ -54,6 +54,7 @@
         },
         "privateAddress": {
             "type": "string",
+            "defaultValue": "none",
             "metadata": {
                 "description": "Enter the internal domain to direct traffic to, in the format http://domain-or-ip:port."
             }
@@ -79,6 +80,31 @@
                 "description": "Set to 'staging' to use LetsEncrypt staging servers; recommended for testing."
             }
 
+        },
+        "useVirtualNetwork": {
+            "type": "bool",
+            "metadata": {
+                "description": "Set to true to deploy into a virtual network."
+            },
+            "defaultValue": false
+        },
+        "virtualNetworkName": {
+            "type": "String",
+            "metadata": {
+                "description": "Password of the account used to join the domain."
+            },
+            "defaultValue": "default"
+        },
+        "addressSpace": {
+            "type": "string",
+            "metadata": {
+                "description": "Address Space for the Virtual Network."
+            },
+            "defaultValue": "10.10.10.0/24"
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
         }
     },
     "variables": {
@@ -117,14 +143,23 @@
         "roleAssignmentId": "[guid(resourceGroup().name)]",
         "containerGroupName": "[resourceGroup().name]",
         "storageAccountName": "[take(replace(parameters('configurationStorageAccount'),'-',''),15)]",
-        "configStorageShare": "[parameters('configurationStorageShareName')]"
+        "configStorageShare": "[parameters('configurationStorageShareName')]",
+        "networkProfileName": "[concat('acinw-', variables('baseName'))]",
+        "interfaceConfigName": "[concat('aciic-', variables('baseName'))]",
+        "interfaceIpConfig": "[concat('aciipc-', variables('baseName'))]",
+        "baseName": "[take(replace(replace(resourceGroup().name, ' ', ''), '_', '-'),12)]",
+        "virtualNetworkName": "[if(equals('default', parameters('virtualNetworkName')),concat('vn-', variables('baseName')),parameters('virtualNetworkName'))]",
+        "subnetName": "[concat('sn-', variables('baseName'))]",
+        "virtualNetworkRef": "[resourceId('Microsoft.Network/virtualnetworks', variables('virtualNetworkName'))]",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('virtualNetworkName'),variables('subnetName'))]",
+        "nginxMode": "[if(equals('none', parameters('privateAddress')),'proxy','noproxy')]"
     },
     "resources": [
         {
             "name": "[variables('cgName')]",
             "type": "Microsoft.ContainerInstance/containerGroups",
             "apiVersion": "2018-10-01",
-            "location": "[resourcegroup().location]",
+            "location": "[parameters('location')]",
             "identity": {
                 "type": "SystemAssigned"
             },
@@ -157,7 +192,7 @@
                                 },
                                 {
                                     "name": "AZURE_LOCATION",
-                                    "value": "[resourceGroup().location]"
+                                    "value": "[parameters('location')]"
                                 },
                                 {
                                     "name": "AZURE_SUBSCRIPTION_ID",
@@ -186,7 +221,7 @@
                                 {
                                     "name": "PRIVATE_ADDRESS",
                                     "value": "[parameters('privateAddress')]"
-                                },                                                               
+                                },
                                 {
                                     "name": "PUBLIC_DOMAIN",
                                     "value": "[parameters('publicDomain')]"
@@ -194,6 +229,10 @@
                                 {
                                     "name": "PUBLIC_PORT",
                                     "value": "[parameters('publicPort')]"
+                                },
+                                {
+                                    "name": "NGINX_MODE",
+                                    "value": "[variables('nginxMode')]"
                                 }
                             ],
                             "resources": {
@@ -236,7 +275,7 @@
             "name": "[parameters('newVaultName')]",
             "type": "Microsoft.KeyVault/vaults",
             "apiVersion": "2016-10-01",
-            "location": "[resourcegroup().location]",
+            "location": "[parameters('location')]",
             "tags": {
             },
             "dependsOn": [
@@ -256,7 +295,10 @@
                             "keys": [
                             ],
                             "secrets": [
-                                "get","set","list","delete"
+                                "get",
+                                "set",
+                                "list",
+                                "delete"
                             ],
                             "certificates": [
                             ],
@@ -272,7 +314,7 @@
             "name": "[variables('containerGroupName')]",
             "type": "Microsoft.ContainerInstance/containerGroups",
             "apiVersion": "2018-10-01",
-            "location": "[resourceGroup().location]",
+            "location": "[parameters('location')]",
             "dependsOn": [
                 "[concat('Microsoft.ContainerInstance/containerGroups/', variables('cgName'))]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
@@ -380,7 +422,7 @@
             "name": "[variables('storageAccountName')]",
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2018-02-01",
-            "location": "[resourceGroup().location]",
+            "location": "[parameters('location')]",
             "tags": {
                 "description": "Used for Nginx+Certificate Storage"
             },
@@ -414,6 +456,62 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
             ]
+        },
+        {
+            "condition": "[and(parameters('useVirtualNetwork'),not(empty(variables('virtualNetworkRef'))))]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2017-09-01",
+            "name": "[variables('virtualNetworkName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('addressSpace')]"
+                    ]
+                }
+            }
+        },
+        {
+            "condition": "[and(parameters('useVirtualNetwork'),not(empty(variables('subnetRef'))))]",
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(variables('virtualNetworkName'), '/', variables('subnetName'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[variables('virtualNetworkRef')]"
+            ],
+            "properties": {
+                "addressPrefix": "[parameters('addressSpace')]"
+            }
+        },
+        {
+            "condition": "[and(parameters('useVirtualNetwork'),not(empty(variables('subnetRef'))))]",
+            "name": "[variables('networkProfileName')]",
+            "type": "Microsoft.Network/networkProfiles",
+            "apiVersion": "2018-07-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[variables('virtualNetworkRef')]"
+            ],
+            "properties": {
+                "containerNetworkInterfaceConfigurations": [
+                    {
+                        "name": "[variables('interfaceConfigName')]",
+                        "properties": {
+                            "ipConfigurations": [
+                                {
+                                    "name": "[variables('interfaceIpConfig')]",
+                                    "properties": {
+                                        "subnet": {
+                                            "id": "[variables('subnetRef')]"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
         }
     ],
     "outputs": {

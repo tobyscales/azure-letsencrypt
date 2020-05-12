@@ -34,13 +34,16 @@ az configure --defaults group=$AZURE_RESOURCE_GROUP
 cd /$BOOTSTRAP_REPO
 
 ### Custom Code goes here 
-function sedPath { 
+
+#this function escapes the passed-in path to work with sed
+function sedPath {  
     local path=$((echo $1|sed -r 's/([\$\.\*\/\[\\^])/\\\1/g'|sed 's/[]]/\[]]/g')>&1) 
     echo "$path"
     }
 echo Shared State Storage: $AZURE_STORAGE_ACCOUNT
 echo Nginx Configured Domain: $PUBLIC_DOMAIN
 echo Nginx Configured Port: $PUBLIC_PORT
+echo Nginx Mode: $NGINX_MODE
 
 echo Setting up Nginx storage accounts...
 az storage share policy create -n $AZURE_STORAGE_ACCOUNT -s nginx-config --permissions dlrw
@@ -57,9 +60,8 @@ echo Updating config files...
 sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$BOOTSTRAP_REPO/conf/*.*
-#sed -i 's/{PRIVATE_PORT}/'$PRIVATE_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
 
-az storage file upload --source /$BOOTSTRAP_REPO/conf/default.conf --share-name nginx-config 
+az storage file upload --source /$BOOTSTRAP_REPO/conf/$NGINX_MODE.conf --share-name nginx-config 
 az storage file upload --source /$BOOTSTRAP_REPO/html/index.html --share-name nginx-html 
 
 
