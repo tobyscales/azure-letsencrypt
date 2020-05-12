@@ -63,13 +63,14 @@ sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
 sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$BOOTSTRAP_REPO/conf/*.*
 
 echo Uploading config files...
-nginxconfig=$(az storage file exists --share-name nginx-config --path $NGINX_MODE.conf --query exists)
+cp /$BOOTSTRAP_REPO/conf/$NGINX_MODE.conf default.conf
+nginxconfig=$(az storage file exists --share-name nginx-config --path default.conf --query exists)
 indexhtml=$(az storage file exists --share-name nginx-html --path index.html --query exists)
 
 if [ ! $nginxconfig ]; then
-az storage file upload --source /$BOOTSTRAP_REPO/conf/$NGINX_MODE.conf --share-name nginx-config --no-progress
+az storage file upload --source default.conf --share-name nginx-config --no-progress
 else 
-echo "  ** $NGINX_MODE.conf file exists, will not update. ** "
+echo "  ** default.conf file exists, will not update. ** "
 fi 
 
 if [ ! $indexhtml ]; then
