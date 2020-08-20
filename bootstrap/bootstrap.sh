@@ -27,7 +27,7 @@ PUBLIC_PORT=$(sedPath $PUBLIC_PORT)
 PRIVATE_ADDRESS=$(sedPath $PRIVATE_ADDRESS)
 
 echo Cloning config files...
-git clone https://github.com/$CONTENT_REPO.git $CONTENT_REPO
+git clone --quiet https://github.com/$CONTENT_REPO.git $CONTENT_REPO
 
 # pass env variables through to config scripts
 echo Updating config files...
@@ -40,7 +40,7 @@ cp /$CONTENT_REPO/conf/$NGINX_MODE.conf default.conf
 nginxconfig=$(az storage file exists --share-name nginx-config --path default.conf --query exists)
 indexhtml=$(az storage file exists --share-name nginx-html --path index.html --query exists)
 
-if [ ! $nginxconfig ]; then
+if [ ! $(az storage file exists --share-name nginx-config --path default.conf --query exists) ]; then
 az storage file upload --source default.conf --share-name nginx-config --no-progress
 else 
 echo "  ** default.conf file exists, will not update. ** "
