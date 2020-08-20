@@ -13,7 +13,7 @@ echo Nginx Configured Domain: $PUBLIC_DOMAIN
 echo Nginx Configured Port: $PUBLIC_PORT
 echo Nginx Mode: $NGINX_MODE
 echo
-echo HTML and Config Files from: $THIS_REPO
+echo HTML and Config Files from: $BOOTSTRAP_REPO
 
 #set default storage account permissions
 echo Setting up Nginx storage accounts...
@@ -27,17 +27,16 @@ PUBLIC_PORT=$(sedPath $PUBLIC_PORT)
 PRIVATE_ADDRESS=$(sedPath $PRIVATE_ADDRESS)
 
 echo Cloning config files...
-cd /
-git clone -n https://github.com/$THIS_REPO
+git clone -n $BOOTSTRAP_REPO /source
 
 # pass env variables through to config scripts
 echo Updating config files...
-sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$THIS_REPO/conf/*.*
-sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$THIS_REPO/conf/*.*
-sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$THIS_REPO/conf/*.*
+sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /source/conf/*.*
+sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /source/conf/*.*
+sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /source/conf/*.*
 
 echo Uploading config files...
-cp /$THIS_REPO/conf/$NGINX_MODE.conf default.conf
+cp /source/conf/$NGINX_MODE.conf default.conf
 nginxconfig=$(az storage file exists --share-name nginx-config --path default.conf --query exists)
 indexhtml=$(az storage file exists --share-name nginx-html --path index.html --query exists)
 
