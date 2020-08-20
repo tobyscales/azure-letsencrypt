@@ -26,7 +26,7 @@ PUBLIC_PORT=$(sedPath $PUBLIC_PORT)
 PRIVATE_ADDRESS=$(sedPath $PRIVATE_ADDRESS)
 
 echo Cloning config files...
-git clone -n $THIS_REPO_URI /
+git clone -n https://github.com/$THIS_REPO /
 
 # pass env variables through to config scripts
 echo Updating config files...
