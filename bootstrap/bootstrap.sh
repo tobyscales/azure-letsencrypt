@@ -38,16 +38,16 @@ sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$CONTENT_REPO/conf/*.*
 sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$CONTENT_REPO/conf/*.*
 
 cp /$CONTENT_REPO/conf/$NGINX_MODE.conf default.conf
-nginxconfigexists=$(az storage file exists --share-name nginx-config --path default.conf --query exists)
+nginxconfig=$(az storage file exists --share-name nginx-config --path default.conf --query exists)
 indexhtml=$(az storage file exists --share-name nginx-html --path index.html --query exists)
 
 # check for existence to avoid accidental overwrite
 echo $nginxconfig
 echo Uploading config files...
-if [ "$nginxconfigexists" == "true" ]; then
-echo "  ** default.conf file exists, will not update. ** "
-else 
+if ! $nginxconfig; then
 az storage file upload --source default.conf --share-name nginx-config --no-progress
+else 
+echo "  ** default.conf file exists, will not update. ** "
 fi 
 
 if  ! $indexhtml; then
@@ -57,8 +57,3 @@ echo "  ** index.html file exists, will not update. ** "
 fi 
 
 echo "### Configuration complete! ###"
-
-#"set" | az container exec --exec-command /bin/sh -n $AZURE_RESOURCE_GROUP -g $AZURE_RESOURCE_GROUP 
-
-## uncomment the below statement to troubleshoot your startup script interactively in ACI (on the Connect tab)
-#tail -f /dev/null

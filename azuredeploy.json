@@ -109,6 +109,10 @@
         "debugOutput": {
             "type": "bool",
             "defaultValue": false
+        },
+        "debugMode": {
+            "type": "bool",
+            "defaultValue": false
         }
     },
     "variables": {
@@ -208,9 +212,14 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "bootStrapUri": { "value": "[variables('thisBootstrapUri')]" },
+                    "bootStrapUri": {
+                        "value": "[variables('thisBootstrapUri')]"
+                    },
                     "environmentVars": {
                         "value": "[concat(variables('environmentVars'), json(concat('[{ \"name\": \"AZURE_STORAGE_KEY\", \"value\": \"', listKeys(variables('storageAccountName'),'2017-10-01').keys[0].value, '\"}]')))]"
+                    },
+                    "debugMode": {
+                        "value": "[parameters('debugMode')]"
                     }
                 }
             }
