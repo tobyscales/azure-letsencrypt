@@ -20,10 +20,14 @@ You can also see this technique used effectively in my [one-click deployment of 
 | configurationStorageShareName | name for Azure Files container where config data lives | defaults to "nginx" |
 | publicDomainName | public DNS record for your server | required |
 | publicPort | publicly-exposed port for your server | defaults to 443 |
-| privateAddress | private IP or nameserver to route requests to | use http(s):// and optionally specify :port |
+| privateAddress | for proxy mode: private IP or nameserver to route requests to (be sure to include http(s):// and optionally specify :port); to simply serve HTML from the storage account set to "none" | defaults to "none"  |
 | ssl-email | email address to use for LetsEncrypt registration | defaults to certbot@eff.org |
 | ssl-env | LetsEncrypt environment to use for registration | defaults to blank; set this to "staging" for testing |
-
+| useVirtualNetwork | Set to true to deploy the containers into a virtual network | defaults to false |
+| virtualNetworkName | Name for the new virtual network | defaults to vn-(resourceGroupName) |
+| addressSpace | Address Space for the new virtual network (NOTE: will automatically create a subnet and assign this whole 
+addressSpace to it) | defaults to 10.10.10/24 |
+| location | Azure region for deployment | defaults to ResourceGroup location |
 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftescales%2Fazure-letsencrypt%2Fmaster%2Fazuredeploy.json" target="_blank">
     <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true"/>
