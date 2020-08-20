@@ -1,18 +1,20 @@
 #!/bin/bash
 # additional environment variables available: $AZURE_SUBSCRIPTION_ID, $AZURE_AADTENANT_ID and $AZURE_KEYVAULT
 
-echo Connecting to Azure Storage: $AZURE_STORAGE_ACCOUNT
-echo Resource Group: $AZURE_RESOURCE_GROUP
-
 #this function escapes the passed-in path to work with sed
 function sedPath {  
     local path=$((echo $1|sed -r 's/([\$\.\*\/\[\\^])/\\\1/g'|sed 's/[]]/\[]]/g')>&1) 
     echo "$path"
     }
+
+echo Connecting to Azure Storage: $AZURE_STORAGE_ACCOUNT
+echo Resource Group: $AZURE_RESOURCE_GROUP
+
 echo Shared State Storage: $AZURE_STORAGE_ACCOUNT
 echo Nginx Configured Domain: $PUBLIC_DOMAIN
 echo Nginx Configured Port: $PUBLIC_PORT
 echo Nginx Mode: $NGINX_MODE
+echo HTML and Config Files from: $THIS_REPO
 
 #set default storage account permissions
 echo Setting up Nginx storage accounts...
@@ -26,7 +28,8 @@ PUBLIC_PORT=$(sedPath $PUBLIC_PORT)
 PRIVATE_ADDRESS=$(sedPath $PRIVATE_ADDRESS)
 
 echo Cloning config files...
-git clone -n https://github.com/$THIS_REPO /
+cd /
+git clone -n https://github.com/$THIS_REPO
 
 # pass env variables through to config scripts
 echo Updating config files...
@@ -35,7 +38,7 @@ sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$THIS_REPO/conf/*.*
 sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$THIS_REPO/conf/*.*
 
 echo Uploading config files...
-cp /$BOOTSTRAP_REPO/conf/$NGINX_MODE.conf default.conf
+cp /$THIS_REPO/conf/$NGINX_MODE.conf default.conf
 nginxconfig=$(az storage file exists --share-name nginx-config --path default.conf --query exists)
 indexhtml=$(az storage file exists --share-name nginx-html --path index.html --query exists)
 
