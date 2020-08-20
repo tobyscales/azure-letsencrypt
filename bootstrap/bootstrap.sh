@@ -9,11 +9,13 @@ function sedPath {
 
 echo !!! bootstrap.sh !!!
 echo Shared State Storage: $AZURE_STORAGE_ACCOUNT
+echo
 echo Nginx Configured Domain: $PUBLIC_DOMAIN
 echo Nginx Configured Port: $PUBLIC_PORT
 echo Nginx Mode: $NGINX_MODE
 echo
 echo HTML and Config Files from: $CONTENT_REPO
+echo
 
 #set default storage account permissions
 echo Setting up Nginx storage accounts...
@@ -35,12 +37,14 @@ sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$CONTENT_REPO/conf/*.*
 sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$CONTENT_REPO/conf/*.*
 sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$CONTENT_REPO/conf/*.*
 
-echo Uploading config files...
 cp /$CONTENT_REPO/conf/$NGINX_MODE.conf default.conf
 nginxconfig=$(az storage file exists --share-name nginx-config --path default.conf --query exists)
 indexhtml=$(az storage file exists --share-name nginx-html --path index.html --query exists)
 
-if [ ! $(az storage file exists --share-name nginx-config --path default.conf --query exists) ]; then
+# check for existence to avoid accidental overwrite
+echo $nginxconfig
+echo Uploading config files...
+if [ ! $nginxconfig == "false" ]; then
 az storage file upload --source default.conf --share-name nginx-config --no-progress
 else 
 echo "  ** default.conf file exists, will not update. ** "
