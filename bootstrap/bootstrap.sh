@@ -36,7 +36,7 @@ sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$CONTENT_REPO/conf/*.*
 sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$CONTENT_REPO/conf/*.*
 
 echo Uploading config files...
-cp /source/conf/$NGINX_MODE.conf default.conf
+cp /$CONTENT_REPO/conf/$NGINX_MODE.conf default.conf
 nginxconfig=$(az storage file exists --share-name nginx-config --path default.conf --query exists)
 indexhtml=$(az storage file exists --share-name nginx-html --path index.html --query exists)
 
