@@ -25,11 +25,14 @@ PUBLIC_DOMAIN=$(sedPath $PUBLIC_DOMAIN)
 PUBLIC_PORT=$(sedPath $PUBLIC_PORT)
 PRIVATE_ADDRESS=$(sedPath $PRIVATE_ADDRESS)
 
+echo Cloning config files...
+git clone -n $THIS_REPO_URI /
+
 # pass env variables through to config scripts
-echo Injecting config files...
-sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$BOOTSTRAP_REPO/conf/*.*
-sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$BOOTSTRAP_REPO/conf/*.*
-sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$BOOTSTRAP_REPO/conf/*.*
+echo Updating config files...
+sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$THIS_REPO/conf/*.*
+sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$THIS_REPO/conf/*.*
+sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$THIS_REPO/conf/*.*
 
 echo Uploading config files...
 cp /$BOOTSTRAP_REPO/conf/$NGINX_MODE.conf default.conf
