@@ -38,19 +38,19 @@ sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$CONTENT_REPO/conf/*.*
 sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$CONTENT_REPO/conf/*.*
 
 cp /$CONTENT_REPO/conf/$NGINX_MODE.conf default.conf
-nginxconfig=$(az storage file exists --share-name nginx-config --path default.conf --query exists)
+nginxconfigexists=$(az storage file exists --share-name nginx-config --path default.conf --query exists)
 indexhtml=$(az storage file exists --share-name nginx-html --path index.html --query exists)
 
 # check for existence to avoid accidental overwrite
 echo $nginxconfig
 echo Uploading config files...
-if [ ! $nginxconfig == "false" ]; then
-az storage file upload --source default.conf --share-name nginx-config --no-progress
-else 
+if [ "$nginxconfigexists" == "true" ]; then
 echo "  ** default.conf file exists, will not update. ** "
+else 
+az storage file upload --source default.conf --share-name nginx-config --no-progress
 fi 
 
-if [ ! $indexhtml ]; then
+if  ! $indexhtml; then
 az storage file upload --source /$CONTENT_REPO/html/index.html --share-name nginx-html --no-progress
 else 
 echo "  ** index.html file exists, will not update. ** "
