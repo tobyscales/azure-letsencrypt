@@ -7,13 +7,12 @@ function sedPath {
     echo "$path"
     }
 
-echo Connecting to Azure Storage: $AZURE_STORAGE_ACCOUNT
-echo Resource Group: $AZURE_RESOURCE_GROUP
-
+echo !!! bootstrap.sh !!!
 echo Shared State Storage: $AZURE_STORAGE_ACCOUNT
 echo Nginx Configured Domain: $PUBLIC_DOMAIN
 echo Nginx Configured Port: $PUBLIC_PORT
 echo Nginx Mode: $NGINX_MODE
+echo
 echo HTML and Config Files from: $THIS_REPO
 
 #set default storage account permissions
