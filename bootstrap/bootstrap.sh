@@ -13,7 +13,7 @@ echo Nginx Configured Domain: $PUBLIC_DOMAIN
 echo Nginx Configured Port: $PUBLIC_PORT
 echo Nginx Mode: $NGINX_MODE
 echo
-echo HTML and Config Files from: $BOOTSTRAP_REPO
+echo HTML and Config Files from: $CONTENT_REPO
 
 #set default storage account permissions
 echo Setting up Nginx storage accounts...
@@ -27,13 +27,13 @@ PUBLIC_PORT=$(sedPath $PUBLIC_PORT)
 PRIVATE_ADDRESS=$(sedPath $PRIVATE_ADDRESS)
 
 echo Cloning config files...
-git clone -n $BOOTSTRAP_REPO /source
+git clone -n $CONTENT_REPO /
 
 # pass env variables through to config scripts
 echo Updating config files...
-sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /source/conf/*.*
-sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /source/conf/*.*
-sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /source/conf/*.*
+sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$CONTENT_REPO/conf/*.*
+sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$CONTENT_REPO/conf/*.*
+sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$CONTENT_REPO/conf/*.*
 
 echo Uploading config files...
 cp /source/conf/$NGINX_MODE.conf default.conf
@@ -47,7 +47,7 @@ echo "  ** default.conf file exists, will not update. ** "
 fi 
 
 if [ ! $indexhtml ]; then
-az storage file upload --source /$BOOTSTRAP_REPO/html/index.html --share-name nginx-html --no-progress
+az storage file upload --source /$CONTENT_REPO/html/index.html --share-name nginx-html --no-progress
 else 
 echo "  ** index.html file exists, will not update. ** "
 fi 
