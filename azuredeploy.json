@@ -182,7 +182,7 @@
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('virtualNetworkName'),variables('subnetName'))]",
         "nginxMode": "[if(equals('none', parameters('privateAddress')),'noproxy','proxy')]",
         "bootstrapperUri": "https://raw.githubusercontent.com/tescales/azure-bootstrapper-arm/master/azuredeploy.json",
-        "thisRepoUri": "[if(contains(deployment().properties, 'templateLink'), deployment().templateLink.uri, 'https://raw.githubusercontent.com/tescales/azure-letsencrypt/master')]",
+        "thisRepoUri": "https://raw.githubusercontent.com/tescales/azure-letsencrypt/master",
         "thisRepoUser": "[take(skip(array(split(variables('thisRepoUri'), '/')),3),1)[0]]",
         "thisRepo": "[take(skip(array(split(variables('thisRepoUri'), '/')),4),1)[0]]",
         "thisBootstrapUri": "[uri(variables('thisRepoUri'), 'master/bootstrap/bootstrap.sh')]",
