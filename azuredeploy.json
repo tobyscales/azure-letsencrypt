@@ -168,7 +168,6 @@
         "NginxCertShare": "nginx-certs",
         "NginxSharedStorage": "nginx-share",
         "ssl-env": "[concat('--',parameters('ssl-env'))]",
-
         "containerGroupName": "[resourceGroup().name]",
         "storageAccountName": "[take(replace(parameters('configurationStorageAccount'),'-',''),15)]",
         "configStorageShare": "[parameters('configurationStorageShareName')]",
@@ -186,7 +185,7 @@
         "thisRepoUser": "[take(skip(array(split(variables('thisRepoUri'), '/')),3),1)[0]]",
         "thisRepo": "[take(skip(array(split(variables('thisRepoUri'), '/')),4),1)[0]]",
         "thisBootstrapUri": "[uri(variables('thisRepoUri'), 'master/bootstrap/bootstrap.sh')]",
-        "storKeyArrayStart": "[string('[{\"name\":\"AZURE_STORAGE_KEY\",\"securevalue\":\"')]"
+        "storKeyArrayStart": "[string('[{\"name\":\"AZURE_STORAGE_KEY\",\"value\":\"')]"
     },
     "resources": [
         {
@@ -205,7 +204,7 @@
                         "value": "[variables('thisBootstrapUri')]"
                     },
                     "environmentVars": {
-                        "value": "[concat(variables('environmentVars'), json(concat('[{ \"name\": \"AZURE_STORAGE_KEY\", \"value\": \"', listKeys(variables('storageAccountName'),'2017-10-01').keys[0].value, '\"}]')))]"
+                        "value": "[concat(variables('environmentVars'), json(concat(variables('storKeyArrayStart'), listKeys(variables('storageAccountName'),'2017-10-01').keys[0].value, '\"}]')))]"
                     },
                     "debugMode": {
                         "value": "[parameters('debugMode')]"
