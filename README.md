@@ -12,10 +12,6 @@ You can also see this technique used effectively in my [one-click deployment of 
 
 | Parameter Name    | What it does   | Default |
 | --- | --- | --- |
-| gitHubUser/gitHubRepo    | indicates where the bootstrap.sh and config files will be taken from |  defaults to this repo |
-| subscriptionId/aadTenantId | used for provisioning appropriate access to the deployment container | defaults to current |
-| roleName   | used to assign access to the deployment container  | defaults to Owner (for this Resource Group only) |
-| newVaultName | creates a new KV and stores deployment secrets there | defaults to none |
 | configurationStorageAccount | name for new Azure Files storage account | defaults to Resource Group Name + "stor" |
 | configurationStorageShareName | name for Azure Files container where config data lives | defaults to "nginx" |
 | publicDomainName | public DNS record for your server | required |
