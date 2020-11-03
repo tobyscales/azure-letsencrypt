@@ -42,7 +42,6 @@ nginxconfig=$(az storage file exists --share-name nginx-config --path default.co
 indexhtml=$(az storage file exists --share-name nginx-html --path index.html --query exists)
 
 # check for existence to avoid accidental overwrite
-echo $nginxconfig
 echo Uploading config files...
 if ! $nginxconfig; then
 az storage file upload --source default.conf --share-name nginx-config --no-progress

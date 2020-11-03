@@ -2,48 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "gitHubUser": {
-            "type": "string",
-            "metadata": {
-                "description": "Your GitHub username"
-            },
-            "defaultValue": "tescales"
-        },
-        "gitHubRepo": {
-            "type": "string",
-            "metadata": {
-                "description": "Your GitHub repo"
-            },
-            "defaultValue": "azure-bootstrapper-arm"
-        },
-        "subscriptionId": {
-            "type": "string",
-            "metadata": {
-                "description": "Your Azure Subscription Id"
-            },
-            "defaultValue": "[subscription().subscriptionId]"
-        },
-        "aadTenantId": {
-            "type": "string",
-            "metadata": {
-                "description": "Your AzureAD TenantId"
-            },
-            "defaultValue": "[subscription().tenantId]"
-        },
-        "roleName": {
-            "type": "string",
-            "metadata": {
-                "description": "Choose the Role to Assign"
-            },
-            "defaultValue": "Owner"
-        },
-        "newVaultName": {
-            "type": "string",
-            "metadata": {
-                "description": "Enter a name to deploy a new KeyVault and grant access to the bootstrapper script, or type 'none' to skip."
-            },
-            "defaultValue": "kv-bootstrap"
-        },
         "configurationStorageAccount": {
             "type": "string",
             "defaultValue": "[concat(resourceGroup().name, 'stor')]"
@@ -79,7 +37,6 @@
             "metadata": {
                 "description": "Set to 'staging' to use LetsEncrypt staging servers; recommended for testing."
             }
-
         },
         "useVirtualNetwork": {
             "type": "bool",
@@ -101,6 +58,13 @@
                 "description": "Address Space for the Virtual Network."
             },
             "defaultValue": "10.10.10.0/24"
+        },
+        "containers": {
+            "type": "array",
+            "metadata": {
+                "description": "ADVANCED. Used to pass additional container objects into the Nginx deployment."
+            },
+            "defaultValue": []
         },
         "location": {
             "type": "string",
@@ -146,39 +110,65 @@
                 "value": "[concat(variables('thisRepoUser'), '/', variables('thisRepo'))]"
             }
         ],
+        "nativeContainers": [
+            {
+                "name": "nginx-ssl",
+                "properties": {
+                    "image": "andreilhicas/nginx-letsencrypt",
+                    "volumeMounts": [
+                        {
+                            "mountPath": "/etc/nginx/conf.d",
+                            "name": "nginx-config"
+                        },
+                        {
+                            "mountPath": "/var/www/html",
+                            "name": "nginx-html"
+                        },
+                        {
+                            "mountPath": "/usr/share/nginx/certificates",
+                            "name": "nginx-certs"
+                        }
+                    ],
+                    "resources": {
+                        "requests": {
+                            "cpu": 1,
+                            "memoryInGb": 1
+                        }
+                    },
+                    "environmentVariables": [
+                        {
+                            "name": "DOMAIN",
+                            "value": "[parameters('publicDomain')]"
+                        },
+                        {
+                            "name": "EMAIL",
+                            "value": "[parameters('ssl-email')]"
+                        },
+                        {
+                            "name": "OPTIONS",
+                            "value": "[if(empty(parameters('ssl-env')), '', variables('ssl-env'))]"
+                        }
+                    ],
+                    "ports": [
+                        {
+                            "port": 80,
+                            "protocol": "TCP"
+                        },
+                        {
+                            "port": "[parameters('publicPort')]",
+                            "protocol": "TCP"
+                        }
+                    ]
+                }
+            }
+        ],
+        "allContainers": "[union(parameters('containers'),  variables('nativeContainers'))]",
         "NginxConfigShare": "nginx-config",
         "NginxHtmlShare": "nginx-html",
         "NginxCertShare": "nginx-certs",
+        "NginxSharedStorage": "nginx-share",
         "ssl-env": "[concat('--',parameters('ssl-env'))]",
-        "imagePath": "mcr.microsoft.com/azure-cli",
-        "imageName": "[take(toLower( split(variables('imagePath'),'/')[1]),23)]",
-        "cgName": "[concat('deploy_', variables('imageName'))]",
-        "roleDefinitions": {
-            "Owner": {
-                "id": "8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
-            },
-            "Contributor": {
-                "id": "b24988ac-6180-42a0-ab88-20f7382dd24c"
-            },
-            "Reader": {
-                "id": "acdd72a7-3385-48ef-bd42-f606fba81ae7"
-            },
-            "StorageBlobDataOwner": {
-                "id": "b7e6dc6d-f1e8-4753-8033-0f276bb0955b"
-            },
-            "StorageBlobDataContributor": {
-                "id": "ba92f5b4-2d11-453d-a403-e96b0029c9fe"
-            },
-            "StorageBlobDataReader": {
-                "value": "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"
-            },
-            "none": {
-                "id": "none"
-            }
-        },
-        "chosenRole": "[variables('roleDefinitions')[parameters('roleName')].id]",
-        "roleDefinitionId": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', variables('chosenRole'))]",
-        "roleAssignmentId": "[guid(resourceGroup().name)]",
+
         "containerGroupName": "[resourceGroup().name]",
         "storageAccountName": "[take(replace(parameters('configurationStorageAccount'),'-',''),15)]",
         "configStorageShare": "[parameters('configurationStorageShareName')]",
@@ -192,7 +182,6 @@
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('virtualNetworkName'),variables('subnetName'))]",
         "nginxMode": "[if(equals('none', parameters('privateAddress')),'noproxy','proxy')]",
         "bootstrapperUri": "https://raw.githubusercontent.com/tescales/azure-bootstrapper-arm/master/azuredeploy.json",
-        "ghURI": "[concat('https://raw.githubusercontent.com/', parameters('gitHubUser'), '/', parameters('gitHubRepo'), '/master/bootstrap/bootstrap.sh')]",
         "thisRepoUri": "[if(contains(deployment().properties, 'templateLink'), deployment().templateLink.uri, 'https://raw.githubusercontent.com/tescales/azure-letsencrypt/master')]",
         "thisRepoUser": "[take(skip(array(split(variables('thisRepoUri'), '/')),3),1)[0]]",
         "thisRepo": "[take(skip(array(split(variables('thisRepoUri'), '/')),4),1)[0]]",
@@ -234,59 +223,8 @@
                 "bootStrap"
             ],
             "properties": {
-                "containers": [
-                    {
-                        "name": "nginx-ssl",
-                        "properties": {
-                            "image": "andreilhicas/nginx-letsencrypt",
-                            "volumeMounts": [
-                                {
-                                    "mountPath": "/etc/nginx/conf.d",
-                                    "name": "nginx-config"
-                                },
-                                {
-                                    "mountPath": "/var/www/html",
-                                    "name": "nginx-html"
-                                },
-                                {
-                                    "mountPath": "/usr/share/nginx/certificates",
-                                    "name": "nginx-certs"
-                                }
-                            ],
-                            "resources": {
-                                "requests": {
-                                    "cpu": 1,
-                                    "memoryInGb": 1
-                                }
-                            },
-                            "environmentVariables": [
-                                {
-                                    "name": "DOMAIN",
-                                    "value": "[parameters('publicDomain')]"
-                                },
-                                {
-                                    "name": "EMAIL",
-                                    "value": "[parameters('ssl-email')]"
-                                },
-                                {
-                                    "name": "OPTIONS",
-                                    "value": "[if(empty(parameters('ssl-env')), '', variables('ssl-env'))]"
-                                }
-                            ],
-                            "ports": [
-                                {
-                                    "port": 80,
-                                    "protocol": "TCP"
-                                },
-                                {
-                                    "port": "[parameters('publicPort')]",
-                                    "protocol": "TCP"
-                                }
-                            ]
-                        }
-                    }
-                ],
                 "osType": "Linux",
+                "containers": "[variables('allContainers')]",
                 "volumes": [
                     {
                         "name": "nginx-config",
@@ -301,7 +239,7 @@
                         "name": "nginx-html",
                         "azureFile": {
                             "shareName": "[variables('NginxHtmlShare')]",
-                            "readOnly": false,
+                            "readOnly": true,
                             "storageAccountName": "[variables('StorageAccountName')]",
                             "storageAccountKey": "[listKeys(variables('storageAccountName'),'2017-10-01').keys[0].value]"
                         }
@@ -310,6 +248,15 @@
                         "name": "nginx-certs",
                         "azureFile": {
                             "shareName": "[variables('NginxCertShare')]",
+                            "readOnly": false,
+                            "storageAccountName": "[variables('StorageAccountName')]",
+                            "storageAccountKey": "[listKeys(variables('storageAccountName'),'2017-10-01').keys[0].value]"
+                        }
+                    },
+                    {
+                        "name": "nginx-share",
+                        "azureFile": {
+                            "shareName": "[variables('NginxSharedStorage')]",
                             "readOnly": false,
                             "storageAccountName": "[variables('StorageAccountName')]",
                             "storageAccountKey": "[listKeys(variables('storageAccountName'),'2017-10-01').keys[0].value]"
@@ -372,6 +319,14 @@
             ]
         },
         {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageAccountName'), '/default/', variables('NginxSharedStorage'))]",
+            "dependsOn": [
+                "[variables('storageAccountName')]"
+            ]
+        },
+        {
             "condition": "[and(parameters('useVirtualNetwork'), not(empty(variables('virtualNetworkRef'))))]",
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2017-09-01",
@@ -429,13 +384,5 @@
         }
     ],
     "outputs": {
-        "outputArray": {
-            "type": "array",
-            "value": "[json(concat('[{ \"name\": \"AZURE_STORAGE_KEY\", \"value\": \"', listKeys(variables('storageAccountName'),'2017-10-01').keys[0].value, '\"}]'))]"
-        },
-        "strArrayStart": {
-            "type": "string",
-            "value": "[variables('storKeyArrayStart')]"
-        }
     }
 }

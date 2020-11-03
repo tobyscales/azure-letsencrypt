@@ -1,35 +1,21 @@
-## Standard Variables for Azure Boostrapper (more here-- https://github.com/tescales/azure-bootstrapper-arm)
+## Standard Variables 
 $resourceGroup = "nginx-letsencrypt"
 $location = "westus2"
-$gitHubUser = "tescales"
-$gitHubRepo = "azure-letsencrypt"
-$roleName = "Owner"
-$kvName = "none"
 
 ## Project Variables
 $privateAddress = "http://10.0.0.100:8080"
 $publicDomain = "www.test.com"
 $publicPort = "443"
-$useVirtualNetwork = "false"
-
-##delete before checkin
-$resourceGroup = "dnd-tobyscales"
-$location = "centralus"
-$gitHubUser = "tescales"
-$gitHubRepo = "azure-letsencrypt"
-$roleName = "Owner"
-$kvName = "none"
-$publicDomain = "tobyscales.work"
-$publicPort = "443"
+$ssl-env = "staging"
 $useVirtualNetwork = "false"
 
 ## Full Standard Deployment (no proxy)
 az group create -n $resourceGroup -l $location 
-az deployment group create --name "cli_deploy-noproxy" --template-file azuredeploy.json --resource-group $resourceGroup --parameters gitHubUser=$githubUser gitHubRepo=$gitHubRepo roleName=Owner newVaultName=$kvName location=$location publicDomain=$publicDomain publicPort=$publicPort 
+az deployment group create --name "cli_deploy-noproxy" --template-file azuredeploy.json --resource-group $resourceGroup --parameters location=$location publicDomain=$publicDomain publicPort=$publicPort ssl-env=$ssl-env
 
 ## Full Standard Deployment (proxy mode)
 az group create -n $resourceGroup -l $location 
-az deployment group create --name "cli_deploy-proxy" --template-file azuredeploy.json --resource-group $resourceGroup --parameters gitHubUser=$githubUser gitHubRepo=$gitHubRepo roleName=Owner newVaultName=none ssl-env=staging publicDomain=$publicDomain publicPort=$publicPort privateAddress=$privateAddress 
+az deployment group create --name "cli_deploy-proxy" --template-file azuredeploy.json --resource-group $resourceGroup --parameters gitHubUser=$githubUser gitHubRepo=$gitHubRepo roleName=Owner newVaultName=none ssl-env=staging publicDomain=$publicDomain publicPort=$publicPort privateAddress=$privateAddress ssl-env=$ssl-env
 
 ## Customized Deployment
 az group deployment create --template-file azuredeploy.json --resource-group $resourceGroup --parameters \ 
