@@ -50,7 +50,7 @@ echo "  ** default.conf file exists, will not update. ** "
 fi 
 
 if  ! $indexhtml; then
-az storage file upload --source /$CONTENT_REPO/html/index.html --share-name nginx-html --no-progress
+az storage file upload-batch --source /$CONTENT_REPO/html --destination nginx-html --no-progress
 else 
 echo "  ** index.html file exists, will not update. ** "
 fi 
