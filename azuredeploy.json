@@ -96,7 +96,7 @@
     "variables": {
         "bootstrapperRepoUri": "https://raw.githubusercontent.com/tobyscales/azure-bootstrapper-arm/master/azuredeploy.json",
         "thisUri": "https://raw.githubusercontent.com/tobyscales/azure-letsencrypt/main/azuredeploy.json",
-        "thisRepoUri": "[if(not(contains(deployment().properties, 'templateLink')), variables('thisURI'), deployment().templateLink.uri)]",
+        "thisRepoUri": "[if(contains(deployment().properties, 'templateLink'), variables('thisURI'), 'aaa')]",
         "thisScriptUri": "[uri(variables('thisRepoUri'), 'main/bootstrap/bootstrap.sh')]",
         "configRepo": "[if(empty(parameters('configRepo')),concat(variables('thisRepo'), '/', variables('thisRepoUser')),parameters('configRepo'))]",
         "contentRepo": "[if(empty(parameters('contentRepo')),concat(variables('thisRepo'), '/', variables('thisRepoUser')),parameters('contentRepo'))]",
