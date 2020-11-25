@@ -14,8 +14,8 @@ echo Nginx Configured Domain: $PUBLIC_DOMAIN
 echo Nginx Configured Port: $PUBLIC_PORT
 echo Nginx Mode: $NGINX_MODE
 echo
-echo HTML and Config Files from: $CONTENT_REPO
-echo
+echo HTML Files from: $CONTENT_REPO
+echo Config Files from: $CONFIG_REPO
 
 #set default storage account permissions
 echo Setting up Nginx storage accounts...
@@ -28,7 +28,7 @@ PUBLIC_DOMAIN=$(sedPath $PUBLIC_DOMAIN)
 PUBLIC_PORT=$(sedPath $PUBLIC_PORT)
 PRIVATE_ADDRESS=$(sedPath $PRIVATE_ADDRESS)
 
-echo Cloning config files...
+echo Cloning content and config files...
 git clone --quiet https://github.com/$CONTENT_REPO.git $CONTENT_REPO
 git clone --quiet https://github.com/$CONFIG_REPO.git $CONFIG_REPO
 
