@@ -95,11 +95,11 @@
     },
     "variables": {
         "bootstrapperRepoUri": "https://raw.githubusercontent.com/tobyscales/azure-bootstrapper-arm/master/azuredeploy.json",
-        "defaultUri": "https://raw.githubusercontent.com/tobyscales/azure-letsencrypt/main/azuredeploy.json",
+        "defaultUri": "https://raw.githubusercontent.com/tobyscales/azure-letsencrypt/master/azuredeploy.json",
         "thisRepoUri": "[if(contains(deployment().properties, 'templateLink'), deployment().properties.templateLink.uri, variables('defaultUri'))]",
         "thisScriptUri": "[uri(variables('thisRepoUri'), 'main/bootstrap/bootstrap.sh')]",
-        "configRepo": "[if(empty(parameters('configRepo')),concat(variables('thisRepo'), '/', variables('thisRepoUser')),parameters('configRepo'))]",
-        "contentRepo": "[if(empty(parameters('contentRepo')),concat(variables('thisRepo'), '/', variables('thisRepoUser')),parameters('contentRepo'))]",
+        "configRepo": "[if(empty(parameters('configRepo')),concat(variables('thisRepoUser'), '/', variables('thisRepo')),parameters('configRepo'))]",
+        "contentRepo": "[if(empty(parameters('contentRepo')),concat(variables('thisRepoUser'), '/', variables('thisRepo')),parameters('contentRepo'))]",
         "environmentVars": [
             {
                 "name": "AZURE_STORAGE_ACCOUNT",
