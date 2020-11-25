@@ -98,6 +98,8 @@
         "defaultUri": "https://raw.githubusercontent.com/tobyscales/azure-letsencrypt/master/azuredeploy.json",
         "thisRepoUri": "[if(contains(deployment().properties, 'templateLink'), deployment().properties.templateLink.uri, variables('defaultUri'))]",
         "thisScriptUri": "[uri(variables('thisRepoUri'), 'main/bootstrap/bootstrap.sh')]",
+        "thisRepoUser": "[take(skip(array(split(variables('thisRepoUri'), '/')),3),1)[0]]",
+        "thisRepo": "[take(skip(array(split(variables('thisRepoUri'), '/')),4),1)[0]]",
         "configRepo": "[if(empty(parameters('configRepo')),concat(variables('thisRepoUser'), '/', variables('thisRepo')),parameters('configRepo'))]",
         "contentRepo": "[if(empty(parameters('contentRepo')),concat(variables('thisRepoUser'), '/', variables('thisRepo')),parameters('contentRepo'))]",
         "environmentVars": [
@@ -205,8 +207,6 @@
         "virtualNetworkRef": "[resourceId('Microsoft.Network/virtualnetworks', variables('virtualNetworkName'))]",
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('virtualNetworkName'),variables('subnetName'))]",
         "nginxMode": "[if(equals('none', parameters('privateAddress')),'noproxy','proxy')]",
-        "thisRepoUser": "[take(skip(array(split(variables('thisRepoUri'), '/')),3),1)[0]]",
-        "thisRepo": "[take(skip(array(split(variables('thisRepoUri'), '/')),4),1)[0]]",
         "thisBootstrapUri": "[uri(variables('thisRepoUri'), '/bootstrap/bootstrap.sh')]",
         "storKeyArrayStart": "[string('[{\"name\":\"AZURE_STORAGE_KEY\",\"value\":\"')]"
     },

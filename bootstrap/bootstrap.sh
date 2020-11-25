@@ -16,6 +16,7 @@ echo Nginx Mode: $NGINX_MODE
 echo
 echo HTML Files from: $CONTENT_REPO
 echo Config Files from: $CONFIG_REPO
+echo
 
 #set default storage account permissions
 echo Setting up Nginx storage accounts...
