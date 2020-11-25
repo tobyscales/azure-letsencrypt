@@ -30,14 +30,15 @@ PRIVATE_ADDRESS=$(sedPath $PRIVATE_ADDRESS)
 
 echo Cloning config files...
 git clone --quiet https://github.com/$CONTENT_REPO.git $CONTENT_REPO
+git clone --quiet https://github.com/$CONFIG_REPO.git $CONFIG_REPO
 
 # pass env variables through to config scripts
 echo Updating config files...
-sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$CONTENT_REPO/conf/*.*
-sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$CONTENT_REPO/conf/*.*
-sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$CONTENT_REPO/conf/*.*
+sed -i 's/{PUBLIC_DOMAIN}/'$PUBLIC_DOMAIN'/g' /$CONFIG_REPO/conf/*.*
+sed -i 's/{PUBLIC_PORT}/'$PUBLIC_PORT'/g' /$CONFIG_REPO/conf/*.*
+sed -i 's/{PRIVATE_ADDRESS}/'$PRIVATE_ADDRESS'/g' /$CONFIG_REPO/conf/*.*
 
-cp /$CONTENT_REPO/conf/$NGINX_MODE.conf default.conf
+cp /$CONFIG_REPO/conf/$NGINX_MODE.conf default.conf
 nginxconfig=$(az storage file exists --share-name nginx-config --path default.conf --query exists)
 indexhtml=$(az storage file exists --share-name nginx-html --path index.html --query exists)
 

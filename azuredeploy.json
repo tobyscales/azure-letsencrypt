@@ -59,10 +59,17 @@
             },
             "defaultValue": "10.10.10.0/24"
         },
-        "scriptUri": {
+        "contentRepo": {
             "type": "string",
             "metadata": {
-                "description": "Additional script to run."
+                "description": "Copy content from this path to serve from the storage account."
+            },
+            "defaultValue": ""
+        },
+        "configRepo": {
+            "type": "string",
+            "metadata": {
+                "description": "Copy configs from this path to /etc/nginx/conf.d."
             },
             "defaultValue": ""
         },
@@ -88,7 +95,11 @@
     },
     "variables": {
         "bootstrapperRepoUri": "https://raw.githubusercontent.com/tobyscales/azure-bootstrapper-arm/master/azuredeploy.json",
-        "thisRepoUri": "https://raw.githubusercontent.com/tobyscales/azure-letsencrypt/master",
+        "thisUri": "https://raw.githubusercontent.com/tobyscales/azure-letsencrypt/main/azuredeploy.json",
+        "thisRepoUri": "[if(contains(deployment().properties, 'templateLink'), deployment().templateLink.uri, variables('thisURI'))]",
+        "thisScriptUri": "[uri(variables('thisRepoUri'), 'main/bootstrap/bootstrap.sh')]",
+        "configRepo": "[if(empty(parameters('configRepo')),concat(variables('thisRepo'), '/', variables('thisRepoUser')),parameters('configRepo'))]",
+        "contentRepo": "[if(empty(parameters('contentRepo')),concat(variables('thisRepo'), '/', variables('thisRepoUser')),parameters('contentRepo'))]",
         "environmentVars": [
             {
                 "name": "AZURE_STORAGE_ACCOUNT",
@@ -116,8 +127,13 @@
             },
             {
                 "name": "CONTENT_REPO",
-                "value": "[concat(variables('thisRepoUser'), '/', variables('thisRepo'))]"
+                "value": "[variables('contentRepo')]"
+            },
+            {
+                "name": "CONFIG_REPO",
+                "value": "[variables('configRepo')]"
             }
+
         ],
         "nativeContainers": [
             {
@@ -209,30 +225,6 @@
                 "parameters": {
                     "scriptUri": {
                         "value": "[variables('thisBootstrapUri')]"
-                    },
-                    "environmentVars": {
-                        "value": "[concat(variables('environmentVars'), json(concat(variables('storKeyArrayStart'), listKeys(variables('storageAccountName'),'2017-10-01').keys[0].value, '\"}]')))]"
-                    },
-                    "debugMode": {
-                        "value": "[parameters('debugMode')]"
-                    }
-                }
-            }
-        },
-        {
-            "condition": "[and(not(empty(parameters('scriptUri'))),not(parameters('debugOutput')))]",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
-            "name": "additionalScript",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('bootstrapperRepoUri')]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "scriptUri": {
-                        "value": "[parameters('scriptUri')]"
                     },
                     "environmentVars": {
                         "value": "[concat(variables('environmentVars'), json(concat(variables('storKeyArrayStart'), listKeys(variables('storageAccountName'),'2017-10-01').keys[0].value, '\"}]')))]"
