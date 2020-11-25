@@ -59,6 +59,13 @@
             },
             "defaultValue": "10.10.10.0/24"
         },
+        "scriptUri": {
+            "type": "string",
+            "metadata": {
+                "description": "Additional script to run."
+            },
+            "defaultValue": ""
+        },
         "containers": {
             "type": "array",
             "metadata": {
@@ -80,8 +87,8 @@
         }
     },
     "variables": {
-        "bootstrapperUri": "https://raw.githubusercontent.com/tescales/azure-bootstrapper-arm/master/azuredeploy.json",
-        "thisRepoUri": "https://raw.githubusercontent.com/tescales/azure-letsencrypt/master",
+        "bootstrapperRepoUri": "https://raw.githubusercontent.com/tobyscales/azure-bootstrapper-arm/master/azuredeploy.json",
+        "thisRepoUri": "https://raw.githubusercontent.com/tobyscales/azure-letsencrypt/master",
         "environmentVars": [
             {
                 "name": "AZURE_STORAGE_ACCOUNT",
@@ -196,12 +203,36 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[variables('bootstrapperUri')]",
+                    "uri": "[variables('bootstrapperRepoUri')]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "bootStrapUri": {
+                    "scriptUri": {
                         "value": "[variables('thisBootstrapUri')]"
+                    },
+                    "environmentVars": {
+                        "value": "[concat(variables('environmentVars'), json(concat(variables('storKeyArrayStart'), listKeys(variables('storageAccountName'),'2017-10-01').keys[0].value, '\"}]')))]"
+                    },
+                    "debugMode": {
+                        "value": "[parameters('debugMode')]"
+                    }
+                }
+            }
+        },
+        {
+            "condition": "[and(not(empty(parameters('scriptUri'))),not(parameters('debugOutput')))]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "name": "additionalScript",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('bootstrapperRepoUri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "scriptUri": {
+                        "value": "[parameters('scriptUri')]"
                     },
                     "environmentVars": {
                         "value": "[concat(variables('environmentVars'), json(concat(variables('storKeyArrayStart'), listKeys(variables('storageAccountName'),'2017-10-01').keys[0].value, '\"}]')))]"
